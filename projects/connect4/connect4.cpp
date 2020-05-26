@@ -80,8 +80,33 @@ class Board{
             return -1;
         }
 
-        bool check_for_win() {
-            return false;
+        bool check_line(int offset, int direction){
+            // Direction 0-7 (n, ne, e, se, s, sw, w, nw)
+            if (direction % 2 == 0) {
+                // (n, e, s, w) - Straight lines
+
+            }
+            else{
+                //(ne, se, sw, nw) - Diagonals
+            }
+
+        }
+
+        bool check_for_win(int position, char type){
+            
+            if (pieces < 7){
+                return false;
+            }
+
+            int offsets[8] = {3, -3, -(3+size_x), (3+size_x), -(3+(size_x+3)), -(3+(size_x-3)), (3+(size_x+3)), (3+(size_x-3))};
+
+            for (int i : offsets){
+                
+                
+
+            }
+
+
         }
 
         bool place_marker(char piece, int position){
@@ -102,15 +127,7 @@ class Board{
                     return false;
                 }
             }
-
             pieces++;
-
-            if (pieces > 7) {
-                bool won = check_for_win();
-                if (won) {
-                    
-                }
-            }
 
             return true;
         }
@@ -168,7 +185,7 @@ int main(){
             current_player = current_player == 2 ? 1 : 2; //Switches the current player
         }
         
-        // clear_console();
+        clear_console();
         b.draw_board(); 
         m.draw_menu();
 
@@ -189,6 +206,13 @@ int main(){
         
         std::cin.clear();
         std::cin.ignore(100000, '\n');
+
+        game_finished = b.check_for_win(marker_position, current_piece);
+
+        if (game_finished){
+            std::cout << "Player" << current_player << " Wins!" << std::endl;
+            return 0;
+        }
 
     }
     return 0;
