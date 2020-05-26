@@ -80,33 +80,48 @@ class Board{
             return -1;
         }
 
-        bool check_line(int offset, int direction){
+        bool check_line(int direction, int position, char type, int offset = 3){
             // Direction 0-7 (n, ne, e, se, s, sw, w, nw)
-            if (direction % 2 == 0) {
-                // (n, e, s, w) - Straight lines
 
+            int n = -(size_x * offset);
+            int e = -offset;
+            int s = size_x * offset;
+            int w = offset;
+
+            int ne = -((size_x * offset) - offset);
+            int se = (size_x * offset) + offset;
+            int sw = (size_x * offset) - offset;
+            int nw = -((size_x * offset) + offset);
+
+            int directions[8] = {n, e, s, w, ne, se, sw, nw};
+
+            if (board[position + directions[direction]].get_piece() == type){
+                if (offset == 1){
+                    return true;
+                }
+                check_line(direction, position, type, offset--);
+                
             }
-            else{
-                //(ne, se, sw, nw) - Diagonals
-            }
+            
+            return false;
 
         }
 
-        bool check_for_win(int position, char type){
+        bool check_for_win(int position, char type, int offset = 3){
             
             if (pieces < 7){
                 return false;
             }
+            
+            bool won;
 
-            int offsets[8] = {3, -3, -(3+size_x), (3+size_x), -(3+(size_x+3)), -(3+(size_x-3)), (3+(size_x+3)), (3+(size_x-3))};
-
-            for (int i : offsets){
-                
-                
-
+            for (int i; i < 8; i++){
+                won = check_line(i, position, type);
+                if (won){
+                    return true;
+                }
             }
-
-
+            return false;
         }
 
         bool place_marker(char piece, int position){
@@ -207,7 +222,7 @@ int main(){
         std::cin.clear();
         std::cin.ignore(100000, '\n');
 
-        game_finished = b.check_for_win(marker_position, current_piece);
+        // game_finished = b.check_for_win(marker_position, current_piece);
 
         if (game_finished){
             std::cout << "Player" << current_player << " Wins!" << std::endl;
