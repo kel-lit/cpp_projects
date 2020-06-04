@@ -80,7 +80,7 @@ class Board{
             return -1;
         }
 
-        bool check_line(int direction, int position, char type, int offset = 3){
+        bool check_line(int direction, int position, char type, int offset){
             // Direction 0-7 (n, ne, e, se, s, sw, w, nw)
 
             int n = -(size_x * offset);
@@ -93,30 +93,31 @@ class Board{
             int sw = (size_x * offset) - offset;
             int nw = -((size_x * offset) + offset);
 
-            int directions[8] = {n, e, s, w, ne, se, sw, nw};
+            int directions[8] = {n, e, s, w, ne, se, sw, nw}; //n, e, s, w, ne, se, sw, nw
 
-            if (board[position + directions[direction]].get_piece() == type){
+            char directional_offset_piece = board[position + directions[direction]].get_piece();
+
+            if (directional_offset_piece == type){
                 if (offset == 1){
                     return true;
                 }
-                check_line(direction, position, type, offset--);
-                
+                else {
+                    return check_line(direction, position, type, --offset);
+                }
             }
-            
             return false;
-
         }
 
-        bool check_for_win(int position, char type, int offset = 3){
+        bool check_for_win(int position, char type){
+            
+            bool won;
             
             if (pieces < 7){
                 return false;
             }
-            
-            bool won;
 
             for (int i; i < 8; i++){
-                won = check_line(i, position, type);
+                won = check_line(i, position, type, 3);
                 if (won){
                     return true;
                 }
@@ -124,7 +125,7 @@ class Board{
             return false;
         }
 
-        bool place_marker(char piece, int position){
+        int place_marker(char piece, int position){
             
             position--; //User-supplied position starts at 1. 
 
@@ -134,17 +135,11 @@ class Board{
             else{
                 int lowest_free_y = check_y(position);
                 if (lowest_free_y > 0){
-                    std::cout << "Placing marker at position " << lowest_free_y << std::endl;
-                    board[lowest_free_y].insert_piece(piece);
-                    return true;
+                    pieces++;
+                    board[lowest_free_y].insert_piece(piece); 
                 }
-                else{
-                    return false;
-                }
+                return lowest_free_y;
             }
-            pieces++;
-
-            return true;
         }
 };
 
@@ -188,15 +183,15 @@ int main(){
     }
 
     int marker_position;
-    bool legal_move = true;
+    int piece_placed = 0;
     bool started = false;
 
     while (!game_finished){
 
-        if (!legal_move) {
+        if (piece_placed < 0) {
             std::cout << "Illegal move" << std::endl;
         }
-        else if(legal_move && started){
+        else if(piece_placed >= 0 && started){
             current_player = current_player == 2 ? 1 : 2; //Switches the current player
         }
         
@@ -213,18 +208,18 @@ int main(){
             std::cout << "Exiting game" << std::endl;
             return 0;
         }
-        
-        std::cout << marker_position;
 
         char current_piece = current_player == 2 ? player1 : player2;
-        bool legal_move = b.place_marker(current_piece, marker_position);
+        piece_placed = b.place_marker(current_piece, marker_position); //Returns the position of the piece, or -1 if no space in the column
         
-        std::cin.clear();
+        std::cin.clear(); // Reset stdin to avoid 
         std::cin.ignore(100000, '\n');
 
-        // game_finished = b.check_for_win(marker_position, current_piece);
+        game_finished = b.check_for_win(piece_placed, current_piece);
 
         if (game_finished){
+            clear_console();
+            b.draw_board();
             std::cout << "Player" << current_player << " Wins!" << std::endl;
             return 0;
         }
